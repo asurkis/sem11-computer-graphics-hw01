@@ -44,16 +44,14 @@ struct Game {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
                  GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data,
+                 GL_STATIC_DRAW);
+
     glBindVertexArray(vao);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat[2]),
                           nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_data), index_data,
-    //             GL_STATIC_DRAW);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -91,13 +89,14 @@ struct Game {
       }
     }
 
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(*shader_program);
     glBindVertexArray(gl->vao_id(VAO_ID_FULLSCREEN));
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl->buf_id(BUF_ID_INDEX));
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl->buf_id(BUF_ID_INDEX));
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+    glBindVertexArray(0);
 
     SDL_GL_SwapWindow(window.get());
   }
