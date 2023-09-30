@@ -296,6 +296,10 @@ std::optional<Game> game;
 
 void main_loop_iteration() { game->main_loop_iteration(); }
 
+// Fix SDL incorrectly processing WinAPI
+#ifdef main
+#undef main
+#endif
 int main() {
   game.emplace();
   while (game->is_running) {

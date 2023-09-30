@@ -51,6 +51,6 @@ if(DEFINED EMSCRIPTEN)
     add_compile_definitions("__EMSCRIPTEN__")
     target_link_options(${PROJECT_NAME} PRIVATE "-sUSE_SDL=2")
 else()
-    target_link_libraries(${PROJECT_NAME} SDL2)
+    target_link_libraries(${PROJECT_NAME} SDL2::SDL2-static)
 endif()
 
