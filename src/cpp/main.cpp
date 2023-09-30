@@ -172,6 +172,27 @@ struct Game {
     next_center_y = (1.0 - ratio) * (h - 2 * y) / min_dim + ratio * cy;
   }
 
+  void drag(Sint32 xrel, Sint32 yrel) {
+    int w, h;
+    SDL_GetWindowSize(window.get(), &w, &h);
+    int min_dim = std::min(w, h);
+
+    double cx = curr_center_x();
+    double cy = curr_center_y();
+    double s = curr_scale();
+
+    // ((2x - w) / min_dim - cx) * s = ((2x' - w) / min_dim - cx') * s
+    // (2x - w) / min_dim - cx = (2x' - w) / min_dim - cx'
+    // dcx = 2dx / min_dim
+    cx += 2.0 * xrel / min_dim;
+    cy -= 2.0 * yrel / min_dim;
+
+    last_center_x = next_center_x = cx;
+    last_center_y = next_center_y = cy;
+    last_scale = next_scale = s;
+    last_update_tick = next_update_tick = last_frame_tick;
+  }
+
   bool is_running = true;
 
   void poll_events() {
@@ -199,6 +220,10 @@ struct Game {
         }
       } else if (evt.type == SDL_MOUSEWHEEL) {
         scroll(evt.wheel.mouseX, evt.wheel.mouseY, evt.wheel.y);
+      } else if (evt.type == SDL_MOUSEMOTION) {
+        if (evt.motion.state & SDL_BUTTON_LMASK) {
+          drag(evt.motion.xrel, evt.motion.yrel);
+        }
       }
     }
   }
