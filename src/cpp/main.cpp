@@ -21,9 +21,9 @@ struct Game {
   Game() : _system(SDL_INIT_VIDEO) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    window = PWindow(SDL_CreateWindow("Hello, world!", SDL_WINDOWPOS_CENTERED,
-                                      SDL_WINDOWPOS_CENTERED, 800, 600,
-                                      SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE));
+    window = PWindow(SDL_CreateWindow(
+        "Hello, world!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800,
+        600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE));
     context = PGLContext(SDL_GL_CreateContext(window.get()));
     gl.emplace();
 
@@ -86,9 +86,11 @@ struct Game {
   void main_loop_iteration() {
     SDL_Event evt;
     while (SDL_PollEvent(&evt)) {
-      if (evt.type == SDL_WINDOWEVENT &&
-          evt.window.event == SDL_WINDOWEVENT_CLOSE) {
-        is_running = false;
+      if (evt.type == SDL_WINDOWEVENT) {
+        if (evt.window.event == SDL_WINDOWEVENT_CLOSE) {
+          is_running = false;
+        } else if (evt.window.event == SDL_WINDOWEVENT_RESIZED) {
+        }
       }
 
       if (evt.type == SDL_KEYDOWN &&
@@ -97,11 +99,12 @@ struct Game {
       }
     }
 
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     int window_width, window_height;
     SDL_GetWindowSize(window.get(), &window_width, &window_height);
+    glViewport(0, 0, window_width, window_height);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(*shader_program);
     glUniform2f(uniform_window_size, window_width, window_height);
