@@ -142,8 +142,7 @@ struct Game {
     last_frame_tick = current_tick;
   }
 
-  // TODO: fix interpolation
-  Uint32 transition_ticks = 1;
+  Uint32 transition_ticks = 125;
   double scroll_coef = 0.25;
 
   void scroll(Sint32 x, Sint32 y, Sint32 delta) {
@@ -158,18 +157,18 @@ struct Game {
     last_center_x = cx;
     last_center_y = cy;
     last_scale = s;
-    next_scale = s * (1.0 - scroll_coef * delta);
+    next_scale *= 1.0 + scroll_coef * delta;
     last_update_tick = last_frame_tick;
     next_update_tick = last_update_tick + transition_ticks;
 
-    // preserve_x = s * ((2x - w) / min_dim - cx);
-    // preserve_y = s * ((2y - h) / min_dim - cy);
-    // s' * ((2x - w) / min_dim - cx') = s * ((2x - w) / min_dim - cx)
-    // cx' * s' = (2x - w) / min_dim * (s' - s) + s * cx
-    // cx' = (1 - s / s') * (2x - w) / min_dim + s / s' * cx
-    double ratio = s / next_scale;
-    next_center_x = (1.0 - ratio) * (2 * x - w) / min_dim + ratio * cx;
-    next_center_y = (1.0 - ratio) * (h - 2 * y) / min_dim + ratio * cy;
+    // ssx (screen space x) = (2x - w) / min_dim
+    // preserve_x = (ssx + cx) / s;
+    // (ssx + cx') / s' = (ssx + cx) / s
+    // cx' / s' = ssx * (1/s - 1/s') + cx / s
+    // cx' = (s' / s - 1) * ssx + s' / s * cx
+    double ratio = next_scale / s;
+    next_center_x = (ratio - 1.0) * (2 * x - w) / min_dim + ratio * cx;
+    next_center_y = (ratio - 1.0) * (h - 2 * y) / min_dim + ratio * cy;
   }
 
   void drag(Sint32 xrel, Sint32 yrel) {
@@ -181,11 +180,11 @@ struct Game {
     double cy = curr_center_y();
     double s = curr_scale();
 
-    // ((2x - w) / min_dim - cx) * s = ((2x' - w) / min_dim - cx') * s
-    // (2x - w) / min_dim - cx = (2x' - w) / min_dim - cx'
-    // dcx = 2dx / min_dim
-    cx += 2.0 * xrel / min_dim;
-    cy -= 2.0 * yrel / min_dim;
+    // ((2x - w) / min_dim + cx) / s = ((2x' - w) / min_dim + cx') / s
+    // (2x - w) / min_dim + cx = (2x' - w) / min_dim + cx'
+    // dcx = -2dx / min_dim
+    cx -= 2.0 * xrel / min_dim;
+    cy += 2.0 * yrel / min_dim;
 
     last_center_x = next_center_x = cx;
     last_center_y = next_center_y = cy;
