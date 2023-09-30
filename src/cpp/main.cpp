@@ -275,7 +275,7 @@ struct Game {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::Begin("Settings window");
+    ImGui::Begin("Settings");
     ImGui::SliderInt("Iterations", &mandelbrot_iters, 1, 1024);
     ImGui::End();
 
