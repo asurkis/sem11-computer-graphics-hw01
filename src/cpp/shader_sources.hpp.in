@@ -1,0 +1,7 @@
+#ifndef shader_sources_hpp_INCLUDED
+#define shader_sources_hpp_INCLUDED
+
+const char SRC_VERT_SHADER[] = {${HEXDUMP_VERT} 0};
+const char SRC_FRAG_SHADER[] = {${HEXDUMP_FRAG} 0};
+
+#endif // shader_sources_hpp_INCLUDED
