@@ -1,7 +1,7 @@
 #ifndef gl_hpp_INCLUDED
 #define gl_hpp_INCLUDED
 
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <SDL.h>
 #include <cstring>
 #include <stdexcept>
@@ -12,9 +12,6 @@ enum VaoId { VAO_ID_FULLSCREEN = 0, VAO_TOTAL };
 
 struct RAII_GL {
   RAII_GL() {
-    if (GLEW_OK != glewInit()) {
-      throw std::runtime_error("Could not initialize GLEW");
-    }
     glGenBuffers(BUF_TOTAL, buf);
     glGenVertexArrays(VAO_TOTAL, vao);
   }
