@@ -1,3 +1,2 @@
 CompileFlags:
-  Add:
-  - -Ibuild-gcc/auto
+  Add: [ -I/usr/include/SDL2 ]

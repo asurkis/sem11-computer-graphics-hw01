@@ -12,6 +12,10 @@ struct Game {
   std::optional<RAII_GL> gl;
   std::optional<ShaderProgram> shader_program;
 
+  GLuint uniform_window_size = 0;
+  GLuint uniform_center = 0;
+  GLuint uniform_scale = 0;
+
   bool is_running = true;
 
   Game() : _system(SDL_INIT_VIDEO) {
@@ -19,7 +23,7 @@ struct Game {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     window = PWindow(SDL_CreateWindow("Hello, world!", SDL_WINDOWPOS_CENTERED,
                                       SDL_WINDOWPOS_CENTERED, 800, 600,
-                                      SDL_WINDOW_OPENGL));
+                                      SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE));
     context = PGLContext(SDL_GL_CreateContext(window.get()));
     gl.emplace();
 
@@ -73,6 +77,10 @@ struct Game {
     glGetProgramInfoLog(*shader_program, info_log.size(), nullptr,
                         info_log.data());
     SDL_Log("Program linking log:\n%s", info_log.data());
+
+    uniform_window_size = glGetUniformLocation(*shader_program, "window_size");
+    uniform_center = glGetUniformLocation(*shader_program, "center");
+    uniform_scale = glGetUniformLocation(*shader_program, "scale");
   }
 
   void main_loop_iteration() {
@@ -92,7 +100,14 @@ struct Game {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    int window_width, window_height;
+    SDL_GetWindowSize(window.get(), &window_width, &window_height);
+
     glUseProgram(*shader_program);
+    glUniform2f(uniform_window_size, window_width, window_height);
+    glUniform2f(uniform_center, 0.0f, 0.0f);
+    glUniform1f(uniform_scale, 1.0f);
+
     glBindVertexArray(gl->vao_id(VAO_ID_FULLSCREEN));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl->buf_id(BUF_ID_INDEX));
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);

@@ -1,7 +1,7 @@
 #ifndef RAII_hpp_INCLUDED
 #define RAII_hpp_INCLUDED
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <memory>
 #include <stdexcept>
 

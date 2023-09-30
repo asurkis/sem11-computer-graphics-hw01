@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 project(ComputerGraphics_hw01)
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
+#find_package(GLEW REQUIRED)
 find_package(SDL2 REQUIRED)
 
 set(CXX_SOURCES src/cpp/main.cpp src/cpp/raii.hpp src/cpp/gl.hpp)
@@ -16,6 +16,15 @@ WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(CMAKE_CXX_STANDARD 17)
 
+include_directories(${SDL2_INCLUDE_DIRS})
+
 add_executable(${PROJECT_NAME} ${CXX_SOURCES})
-target_link_libraries(${PROJECT_NAME} SDL2 OpenGL GLEW)
 add_dependencies(${PROJECT_NAME} Shaders)
+
+if(DEFINED EMSCRIPTEN)
+    add_compile_definitions("__EMSCRIPTEN__")
+    target_link_options(${PROJECT_NAME} PRIVATE "-sUSE_SDL=2")
+else()
+    target_link_libraries(${PROJECT_NAME} SDL2 OpenGL GLEW)
+endif()
+

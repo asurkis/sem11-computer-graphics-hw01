@@ -2,7 +2,7 @@
 #define gl_hpp_INCLUDED
 
 #include <GL/glew.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <cstring>
 #include <stdexcept>
 #include <vector>
