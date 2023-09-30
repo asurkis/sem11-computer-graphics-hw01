@@ -1,9 +1,9 @@
 #ifndef gl_hpp_INCLUDED
 #define gl_hpp_INCLUDED
 
-#include <glad/gl.h>
 #include <SDL.h>
 #include <cstring>
+#include <glad/gl.h>
 #include <stdexcept>
 #include <vector>
 
@@ -12,13 +12,14 @@ enum VaoId { VAO_ID_FULLSCREEN = 0, VAO_TOTAL };
 
 struct RAII_GL {
   RAII_GL() {
+    gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress);
     glGenBuffers(BUF_TOTAL, buf);
     glGenVertexArrays(VAO_TOTAL, vao);
   }
 
-  ~RAII_GL() { 
-      glDeleteVertexArrays(VAO_TOTAL, vao);
-      glDeleteBuffers(BUF_TOTAL, buf); 
+  ~RAII_GL() {
+    glDeleteVertexArrays(VAO_TOTAL, vao);
+    glDeleteBuffers(BUF_TOTAL, buf);
   }
 
   RAII_GL(const RAII_GL &) = delete;
@@ -44,7 +45,9 @@ struct Shader {
 
     std::vector<GLchar> log(log_length);
     glGetShaderInfoLog(idx, log.size(), nullptr, log.data());
-    SDL_Log("Compiling shader with source:\n////////////////\n%s\n////////////////", source);
+    SDL_Log(
+        "Compiling shader with source:\n////////////////\n%s\n////////////////",
+        source);
     SDL_Log("Shader compilation log:\n%s", log.data());
   }
 

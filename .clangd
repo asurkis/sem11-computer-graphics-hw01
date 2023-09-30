@@ -1,2 +1,5 @@
 CompileFlags:
-  Add: [ -I/usr/include/SDL2, -Isrc/cpp/imgui ]
+  Add:
+  - -Ithird-party/SDL/include
+  - -Ithird-party/glad/include
+  - -Ithird-party/imgui
