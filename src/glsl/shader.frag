@@ -12,7 +12,7 @@ void main() {
   vec2 xy = 2.0 * gl_FragCoord.xy - window_size;
   vec2 c = (xy / min_dim + center) / scale;
   vec2 z = vec2(0);
-  for (int i = 0; i < 256; ++i) {
+  for (int i = 0; i < iterations; ++i) {
     z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
   }
   float r = 1.0 - exp(-length(z));

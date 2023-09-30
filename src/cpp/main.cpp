@@ -1,6 +1,10 @@
 #include "gl.hpp"
 #include "raii.hpp"
 #include "shader_sources.hpp"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_impl_sdl2.h"
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -16,6 +20,7 @@ struct Game {
   GLuint uniform_window_size = 0;
   GLuint uniform_center = 0;
   GLuint uniform_scale = 0;
+  GLuint uniform_iterations = 0;
 
   Game() : _system(SDL_INIT_VIDEO) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -24,6 +29,15 @@ struct Game {
         "Hello, world!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800,
         600, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE));
     context = PGLContext(SDL_GL_CreateContext(window.get()));
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    ImGui_ImplSDL2_InitForOpenGL(window.get(), context.get());
+    ImGui_ImplOpenGL3_Init();
+
     gl.emplace();
 
     // Disable V-Sync
@@ -31,6 +45,12 @@ struct Game {
 
     init_buffers();
     init_shaders();
+  }
+
+  ~Game() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
   }
 
   void init_buffers() const noexcept {
@@ -83,6 +103,7 @@ struct Game {
     uniform_window_size = glGetUniformLocation(*shader_program, "window_size");
     uniform_center = glGetUniformLocation(*shader_program, "center");
     uniform_scale = glGetUniformLocation(*shader_program, "scale");
+    uniform_iterations = glGetUniformLocation(*shader_program, "iterations");
   }
 
   Uint32 fps_update_interval = 1000;
@@ -197,6 +218,8 @@ struct Game {
   void poll_events() {
     SDL_Event evt;
     while (SDL_PollEvent(&evt)) {
+      ImGui_ImplSDL2_ProcessEvent(&evt);
+
       if (evt.type == SDL_WINDOWEVENT &&
           evt.window.event == SDL_WINDOWEVENT_CLOSE) {
         is_running = false;
@@ -227,6 +250,8 @@ struct Game {
     }
   }
 
+  int mandelbrot_iters = 256;
+
   void redraw() {
     int window_width, window_height;
     SDL_GetWindowSize(window.get(), &window_width, &window_height);
@@ -239,11 +264,23 @@ struct Game {
     glUniform2f(uniform_window_size, window_width, window_height);
     glUniform2f(uniform_center, curr_center_x(), curr_center_y());
     glUniform1f(uniform_scale, curr_scale());
+    glUniform1i(uniform_iterations, mandelbrot_iters);
 
     glBindVertexArray(gl->vao_id(VAO_ID_FULLSCREEN));
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl->buf_id(BUF_ID_INDEX));
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
     glBindVertexArray(0);
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Settings window");
+    ImGui::SliderInt("Iterations", &mandelbrot_iters, 1, 1024);
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     SDL_GL_SwapWindow(window.get());
   }
@@ -255,13 +292,13 @@ struct Game {
   }
 };
 
-std::optional<Game> global;
+std::optional<Game> game;
 
-void main_loop_iteration() { global->main_loop_iteration(); }
+void main_loop_iteration() { game->main_loop_iteration(); }
 
 int main() {
-  global.emplace();
-  while (global->is_running) {
+  game.emplace();
+  while (game->is_running) {
     main_loop_iteration();
   }
   return 0;
