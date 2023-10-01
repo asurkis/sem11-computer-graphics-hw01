@@ -106,13 +106,13 @@ struct Game {
     uniform_iterations = glGetUniformLocation(*shader_program, "iterations");
   }
 
-  Uint32 fps_update_interval = 1000;
-  Uint32 fps_last_tick = 0;
-  Uint32 last_frame_tick = 0;
+  int fps_update_interval = 1000;
+  int fps_last_tick = 0;
+  int last_frame_tick = 0;
   int frames_passed = 0;
 
-  Uint32 last_update_tick = 0;
-  Uint32 next_update_tick = 0;
+  int last_update_tick = 0;
+  int next_update_tick = 0;
   float last_center_x = 0.0f;
   float last_center_y = 0.0f;
   float next_center_x = 0.0f;
@@ -143,8 +143,8 @@ struct Game {
   }
 
   void update_time() {
-    Uint32 current_tick = SDL_GetTicks();
-    Uint32 ms_passed = current_tick - fps_last_tick;
+    int current_tick = SDL_GetTicks();
+    int ms_passed = current_tick - fps_last_tick;
 
     if (ms_passed > fps_update_interval) {
       float fps = 1000.0f * frames_passed / ms_passed;
@@ -159,14 +159,15 @@ struct Game {
 
     ++frames_passed;
 
-    Uint32 dt = current_tick - last_frame_tick;
+    int dt = current_tick - last_frame_tick;
     last_frame_tick = current_tick;
   }
 
-  Uint32 transition_ticks = 125;
-  double scroll_coef = 0.25;
+  int transition_ticks = 125;
+  // Single precision because of ImGui
+  float scroll_coef = 0.25f;
 
-  void scroll(Sint32 x, Sint32 y, Sint32 delta) {
+  void scroll(double x, double y, double delta) {
     int w, h;
     SDL_GetWindowSize(window.get(), &w, &h);
     int min_dim = std::min(w, h);
@@ -192,7 +193,7 @@ struct Game {
     next_center_y = (ratio - 1.0) * (h - 2 * y) / min_dim + ratio * cy;
   }
 
-  void drag(Sint32 xrel, Sint32 yrel) {
+  void drag(double xrel, double yrel) {
     int w, h;
     SDL_GetWindowSize(window.get(), &w, &h);
     int min_dim = std::min(w, h);
@@ -277,6 +278,9 @@ struct Game {
 
     ImGui::Begin("Settings");
     ImGui::SliderInt("Iterations", &mandelbrot_iters, 1, 1024);
+    ImGui::SliderInt("FPS update interval, ms", &fps_update_interval, 1, 2000);
+    ImGui::SliderInt("Animation duration, ms", &transition_ticks, 1, 2000);
+    ImGui::SliderFloat("Scroll coefficient", &scroll_coef, 0.125, 0.875);
     ImGui::End();
 
     ImGui::Render();
