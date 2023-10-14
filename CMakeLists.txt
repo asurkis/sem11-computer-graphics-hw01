@@ -47,5 +47,5 @@ include_directories(
 add_executable(${PROJECT_NAME} ${CXX_SOURCES})
 add_dependencies(${PROJECT_NAME} Shaders)
 
-target_link_libraries(${PROJECT_NAME} SDL2::SDL2-static)
+target_link_libraries(${PROJECT_NAME} SDL2::SDL2main SDL2::SDL2-static)
 

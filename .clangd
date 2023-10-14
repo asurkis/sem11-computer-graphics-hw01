@@ -1,5 +1,0 @@
-CompileFlags:
-  Add:
-  - -Ithird-party/SDL/include
-  - -Ithird-party/glad/include
-  - -Ithird-party/imgui
