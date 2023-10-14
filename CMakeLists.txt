@@ -44,7 +44,11 @@ include_directories(
     third-party/imgui
 )
 
-add_executable(${PROJECT_NAME} ${CXX_SOURCES})
+if(WIN32)
+    add_executable(${PROJECT_NAME} WIN32 ${CXX_SOURCES})
+else()
+    add_executable(${PROJECT_NAME} ${CXX_SOURCES})
+endif()
 add_dependencies(${PROJECT_NAME} Shaders)
 
 target_link_libraries(${PROJECT_NAME} SDL2::SDL2main SDL2::SDL2-static)
